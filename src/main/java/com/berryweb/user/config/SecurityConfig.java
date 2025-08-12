@@ -42,12 +42,36 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:*", "http://127.0.0.1:*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // Public endpoints
+                        // ✅ v1 API 경로들을 permitAll로 설정
+                        .requestMatchers(
+                                "/v1/auth/login",
+                                "/v1/auth/register",
+                                "/v1/auth/password-reset",
+                                "/v1/auth/password-reset/confirm",
+                                "/v1/auth/email/verify",
+                                "/v1/auth/email/resend",
+                                "/v1/auth/oauth2/**"
+                        ).permitAll()
+                        // ✅ 기존 경로들도 유지 (하위 호환성)
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/register",
@@ -59,11 +83,11 @@ public class SecurityConfig {
                                 "/actuator/health"
                         ).permitAll()
                         // Admin endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**", "/v1/admin/**").hasRole("ADMIN")
                         // Sysop endpoints
-                        .requestMatchers("/sysop/**").hasAnyRole("ADMIN", "SYSOP")
+                        .requestMatchers("/sysop/**", "/v1/sysop/**").hasAnyRole("ADMIN", "SYSOP")
                         // Staff endpoints
-                        .requestMatchers("/staff/**").hasAnyRole("ADMIN", "SYSOP", "STAFF")
+                        .requestMatchers("/staff/**", "/v1/staff/**").hasAnyRole("ADMIN", "SYSOP", "STAFF")
                         // All other requests need authentication
                         .anyRequest().authenticated()
                 )
@@ -71,19 +95,6 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 
 }
