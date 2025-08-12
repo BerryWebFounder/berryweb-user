@@ -40,7 +40,7 @@ server:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:mySecretKey}
+    secret: ${JWT_SECRET:myVeryLongSecretKeyThatIsAtLeast32BytesLongForJWTSigning}
     expiration: ${JWT_EXPIRATION:86400} # 24 hours in seconds
 
   security:

@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 @RequiredArgsConstructor
 @CrossOrigin("*")
 @Slf4j
@@ -26,7 +26,6 @@ public class AuthController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest) {
-
         request.setIpAddress(getClientIpAddress(httpRequest));
         request.setUserAgent(httpRequest.getHeader("User-Agent"));
 
@@ -36,6 +35,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserDto>> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("=== REGISTER REQUEST START ===");
+        log.info("Request received: {}", request);
+        log.info("Username: {}", request.getUsername());
+        log.info("Email: {}", request.getEmail());
+        log.info("Password length: {}", request.getPassword() != null ? request.getPassword().length() : "null");
+        log.info("Name: {}", request.getName());
+        log.info("=== REGISTER REQUEST END ===");
+
         UserDto user = authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Registration successful. Please check your email for verification.", user));
