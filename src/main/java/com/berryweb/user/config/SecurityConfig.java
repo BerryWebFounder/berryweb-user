@@ -61,7 +61,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        // ✅ v1 API 경로들을 permitAll로 설정
                         .requestMatchers(
                                 "/v1/auth/login",
                                 "/v1/auth/register",
@@ -70,17 +69,6 @@ public class SecurityConfig {
                                 "/v1/auth/email/verify",
                                 "/v1/auth/email/resend",
                                 "/v1/auth/oauth2/**"
-                        ).permitAll()
-                        // ✅ 기존 경로들도 유지 (하위 호환성)
-                        .requestMatchers(
-                                "/auth/login",
-                                "/auth/register",
-                                "/auth/password-reset",
-                                "/auth/password-reset/confirm",
-                                "/auth/email/verify",
-                                "/auth/email/resend",
-                                "/health",
-                                "/actuator/health"
                         ).permitAll()
                         // Admin endpoints
                         .requestMatchers("/admin/**", "/v1/admin/**").hasRole("ADMIN")

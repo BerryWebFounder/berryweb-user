@@ -38,11 +38,11 @@ server:
   servlet:
     context-path: /api
 
-app:
-  jwt:
-    secret: ${JWT_SECRET:myVeryLongSecretKeyThatIsAtLeast32BytesLongForJWTSigning}
-    expiration: ${JWT_EXPIRATION:86400} # 24 hours in seconds
+jwt:
+  secret: ${JWT_SECRET:bXktc3VwZXItc2VjcmV0LWp3dC1zaWduaW5nLWtleS1mb3ItbWljcm9zZXJ2aWNlcy1zaG91bGQtYmUtdmVyeS1sb25nLTI1Ni1iaXRz}
+  expiration: ${JWT_EXPIRATION:86400} # 24 hours in seconds
 
+app:
   security:
     max-login-attempts: ${MAX_LOGIN_ATTEMPTS:5}
     account-lock-time: ${ACCOUNT_LOCK_TIME:3600} # 1 hour in seconds
